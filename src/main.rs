@@ -1,4 +1,4 @@
-//! main.rs1
+//! main.rs
 
 use std::net::TcpListener;
 use zero2prod::run;
