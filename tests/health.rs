@@ -3,7 +3,7 @@ mod helpers;
 #[tokio::test]
 async fn health_check_works() {
     // Arrage
-    let address = crate::helpers::spawn_app();
+    let address = helpers::spawn_app();
     let client = reqwest::Client::new();
 
     // Act
