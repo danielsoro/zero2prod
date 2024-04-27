@@ -1,19 +1,9 @@
-use std::net::TcpListener;
-
-fn spawn_app() -> String {
-    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
-    let port = listener.local_addr().unwrap().port();
-
-    let server = zero2prod::run(listener).expect("Failed to bind address");
-    let _ = tokio::spawn(server);
-
-    format!("http://localhost:{}", port)
-}
+mod helpers;
 
 #[tokio::test]
 async fn health_check_works() {
     // Arrage
-    let address = spawn_app();
+    let address = crate::helpers::spawn_app();
     let client = reqwest::Client::new();
 
     // Act
