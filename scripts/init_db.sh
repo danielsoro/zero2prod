@@ -13,7 +13,7 @@ if ! [ -x "$(command -v sqlx)" ]; then
     echo >&2 "cargo install --version='~0.7' sqlx-cli \
     --no-default-features --features rustls,postgres"
     echo >&2 "to install it."
-exit 1
+    exit 1
 fi
 
 DB_USER="${POSTGRES_USER:=postgres}"
@@ -22,15 +22,14 @@ DB_NAME="${POSTGRES_DB:=newsletter}"
 DB_PORT="${POSTGRES_PORT:=5432}"
 DB_HOST="${POSTGRES_HOST:=localhost}"
 
-if [[ -z "${SKIP_DOCKER}" ]]
-then 
-docker run \
-    -e POSTGRES_USER=${DB_USER} \
-    -e POSTGRES_PASSWORD=${DB_PASSWORD} \
-    -e POSTGRES_DB=${DB_NAME} \
-    -p "${DB_PORT}":5432 \
-    -d postgres \
-    postgres -N 1000
+if [[ -z "${SKIP_DOCKER}" ]]; then 
+    docker run \
+        -e POSTGRES_USER=${DB_USER} \
+        -e POSTGRES_PASSWORD=${DB_PASSWORD} \
+        -e POSTGRES_DB=${DB_NAME} \
+        -p "${DB_PORT}":5432 \
+        -d postgres \
+        postgres -N 1000
 fi 
 
 export PGPASSWORD="${DB_PASSWORD}"
