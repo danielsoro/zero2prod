@@ -1,4 +1,4 @@
-use crate::routes::health_check;
+use crate::routes::health;
 use crate::routes::subscribe;
 use actix_web::middleware::Logger;
 use actix_web::{dev::Server, web, App, HttpServer};
@@ -10,8 +10,8 @@ pub fn run(listener: TcpListener, pg_pool: PgPool) -> Result<Server, std::io::Er
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
-            .route("/health", web::get().to(health_check))
-            .route("/subscribe", web::post().to(subscribe))
+            .service(health)
+            .service(subscribe)
             .app_data(pg_pool.clone())
     })
     .listen(listener)?

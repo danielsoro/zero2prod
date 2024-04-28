@@ -1,4 +1,4 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -9,6 +9,7 @@ pub struct FormData {
     email: String,
 }
 
+#[post("/subscribe")]
 pub async fn subscribe(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
     match sqlx::query!(
         r#"
