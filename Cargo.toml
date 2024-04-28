@@ -13,6 +13,13 @@ name = "zero2prod"
 
 [dependencies]
 actix-web = "4.5"
+config = "0.14"
+uuid = { version = "1", features = ["v4"] }
+
+[dependencies.chrono]
+version = "0.4"
+default-features = false
+features = ["clock"]
 
 [dependencies.tokio]
 version = "1"
