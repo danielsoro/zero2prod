@@ -10,8 +10,8 @@ pub fn run(listener: TcpListener, pg_pool: PgPool) -> Result<Server, std::io::Er
     let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
-            .service(health)
-            .service(subscribe)
+            .service(web::scope("health").service(health))
+            .service(web::scope("subscribe").service(subscribe))
             .app_data(pg_pool.clone())
     })
     .listen(listener)?

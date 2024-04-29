@@ -1,6 +1,6 @@
 use actix_web::{get, HttpResponse, Responder};
 
-#[get("/health")]
+#[get("")]
 pub async fn health() -> impl Responder {
     HttpResponse::NoContent()
 }

@@ -9,7 +9,7 @@ pub struct FormData {
     email: String,
 }
 
-#[post("/subscribe")]
+#[post("")]
 pub async fn subscribe(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
     match sqlx::query!(
         r#"
