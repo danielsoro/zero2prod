@@ -1,5 +1,5 @@
 use crate::routes::health;
-use crate::routes::subscribe;
+use crate::routes::subscription;
 use actix_web::middleware::Logger;
 use actix_web::{dev::Server, web, App, HttpServer};
 use sqlx::PgPool;
@@ -11,7 +11,7 @@ pub fn run(listener: TcpListener, pg_pool: PgPool) -> Result<Server, std::io::Er
         App::new()
             .wrap(Logger::default())
             .service(web::scope("health").service(health))
-            .service(web::scope("subscribe").service(subscribe))
+            .service(web::scope("subscriptions").service(subscription))
             .app_data(pg_pool.clone())
     })
     .listen(listener)?
