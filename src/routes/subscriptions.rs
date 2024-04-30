@@ -11,7 +11,12 @@ pub struct FormData {
 
 #[post("")]
 pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
-    log::info!("Saving new subscriber details in the database");
+    log::info!(
+        "Adding '{}' '{}' as a new subscriber",
+        form.name,
+        form.email
+    );
+    log::info!("Saving new subscribe details in the database");
     match sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, email, name, subscribed_at)
