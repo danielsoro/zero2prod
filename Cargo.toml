@@ -11,6 +11,9 @@ path = "src/lib.rs"
 path = "src/main.rs"
 name = "zero2prod"
 
+[profile.dev.package.sqlx-macros]
+opt-level = 3
+
 [dependencies]
 actix-web = "4.5"
 config = "0.14"
@@ -33,14 +36,7 @@ features = ["derive"]
 [dependencies.sqlx]
 version = "0.7"
 default-features = false
-features = [
-    "runtime-tokio-rustls",
-    "macros",
-    "postgres",
-    "uuid",
-    "chrono",
-    "migrate",
-]
+features = ["runtime-tokio", "macros", "postgres", "uuid", "chrono", "migrate"]
 
 [dev-dependencies]
 reqwest = "0.12"
