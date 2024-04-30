@@ -4,14 +4,14 @@ use sqlx::PgPool;
 use tracing::{error_span, info_span, instrument, Instrument};
 use uuid::Uuid;
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct FormData {
     name: String,
     email: String,
 }
 
 #[post("")]
-#[instrument]
+#[instrument(skip_all)]
 pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
     let request_id = Uuid::new_v4();
     info_span!(
