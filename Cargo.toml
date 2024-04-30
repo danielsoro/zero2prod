@@ -17,8 +17,9 @@ opt-level = 3
 [dependencies]
 actix-web = "4.5"
 config = "0.14"
-env_logger = "0.11.3"
-log = "0.4"
+tracing = { version = "0.1", features = ["log"] }
+tracing-bunyan-formatter = "0.3"
+tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 uuid = { version = "1", features = ["v4"] }
 
 [dependencies.chrono]
