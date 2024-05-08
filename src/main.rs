@@ -1,12 +1,8 @@
-use sqlx::{types::Json, PgPool};
+use sqlx::{PgPool};
 use std::net::TcpListener;
-use tracing_log::LogTracer;
 
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::{layer::SubscriberExt, EnvFilter, FmtSubscriber, Registry};
 use zero2prod::{
     configuration::get_configuration,
-    routes::subscribes,
     startup::run,
     telemetry::{get_subscribe, init_subscriber},
 };
