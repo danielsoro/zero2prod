@@ -6,11 +6,11 @@ use uuid::Uuid;
 use zero2prod::{
     configuration::{get_configuration, DatabaseSettings},
     startup::run,
-    telemetry::{get_subscribe, init_subscriber},
+    telemetry::{get_subscriber, init_subscriber},
 };
 
 static TRACING: Lazy<()> = Lazy::new(|| {
-    let subscriber = get_subscribe("test".into(), "debug".into());
+    let subscriber = get_subscriber("test".into(), "debug".into());
     init_subscriber(subscriber);
 });
 
