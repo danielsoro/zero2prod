@@ -11,16 +11,16 @@ pub struct FormData {
 }
 
 #[post("")]
-#[instrument(skip_all)]
+#[tracing::instrument(
+    name = "Adding a new subscriber",
+    skip(form, pg_pool),
+    fields(
+        request_id = %Uuid::new_v4(),
+        subscriber_email = %form.email,
+        subscriber_name = %form.name
+    )
+)]
 pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
-    let request_id = Uuid::new_v4();
-    info_span!(
-            "Adding a new subscriber.",
-            request_id = %request_id,
-            subscriber_email = %form.email,
-            subscriber_name = %form.name
-    );
-
     let query_span = info_span!("Saving new subscriber details in the database");
     match sqlx::query!(
         r#"
@@ -38,13 +38,7 @@ pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -
     {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {
-            error_span!(
-                "Failed to execute query when saving new subscriber",
-                error = %e,
-                %request_id,
-                subscriber_email = %form.email,
-                subscriber_name = %form.name
-            );
+            tracing::error!("Failed to execute query when saving new subscriber {:?}", e);
             HttpResponse::InternalServerError().finish()
         }
     }
