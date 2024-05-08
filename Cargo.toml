@@ -10,6 +10,7 @@ opt-level = 3
 [dependencies]
 actix-web = "4.5"
 config = "0.14"
+once_cell = "1.19.0"
 tracing = { version = "0.1", features = ["log"] }
 tracing-bunyan-formatter = "0.3"
 tracing-log = "0.2"
