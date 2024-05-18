@@ -42,4 +42,5 @@ default-features = false
 features = ["runtime-tokio", "macros", "postgres", "uuid", "chrono", "migrate"]
 
 [dev-dependencies]
+fake = "2.9.2"
 reqwest = "0.12"
