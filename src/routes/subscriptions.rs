@@ -1,4 +1,8 @@
-use actix_web::{post, web, HttpResponse};
+use actix_web::{
+    post,
+    web::{self, Form},
+    HttpResponse,
+};
 use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -11,13 +15,12 @@ pub struct FormData {
     email: String,
 }
 
-impl TryFrom<FormData> for NewSubscriber {
+impl TryInto<NewSubscriber> for Form<FormData> {
     type Error = String;
-
-    fn try_from(value: FormData) -> Result<Self, Self::Error> {
-        let name = SubscriberName::parse(value.name)?;
-        let email = SubscriberEmail::parse(value.email)?;
-        Ok(Self { name, email })
+    fn try_into(self) -> Result<NewSubscriber, Self::Error> {
+        let name = SubscriberName::parse(self.0.name)?;
+        let email = SubscriberEmail::parse(self.0.email)?;
+        Ok(NewSubscriber { name, email })
     }
 }
 
@@ -31,7 +34,7 @@ impl TryFrom<FormData> for NewSubscriber {
     )
 )]
 pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> HttpResponse {
-    let new_subscriber = match form.into_inner().try_into() {
+    let new_subscriber = match form.try_into() {
         Ok(form) => form,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
