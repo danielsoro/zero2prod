@@ -1,6 +1,6 @@
-use actix_web::{get, HttpResponse, Responder};
+use actix_web::{get, HttpResponse};
 
 #[get("")]
-pub async fn health() -> impl Responder {
-    HttpResponse::NoContent()
+pub async fn health() -> HttpResponse {
+    HttpResponse::NoContent().finish()
 }

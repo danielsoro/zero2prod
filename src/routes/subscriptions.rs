@@ -1,7 +1,6 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse};
 use chrono::Utc;
 use sqlx::PgPool;
-use unicode_segmentation::UnicodeSegmentation;
 use uuid::Uuid;
 
 use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
@@ -10,6 +9,16 @@ use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
 pub struct FormData {
     name: String,
     email: String,
+}
+
+impl TryFrom<FormData> for NewSubscriber {
+    type Error = String;
+
+    fn try_from(value: FormData) -> Result<Self, Self::Error> {
+        let name = SubscriberName::parse(value.name)?;
+        let email = SubscriberEmail::parse(value.email)?;
+        Ok(Self { name, email })
+    }
 }
 
 #[post("")]
@@ -21,32 +30,16 @@ pub struct FormData {
         subscriber_name = %form.name
     )
 )]
-pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
-    let name = match SubscriberName::parse(form.name.clone()) {
-        Ok(name) => name,
+pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> HttpResponse {
+    let new_subscriber = match form.into_inner().try_into() {
+        Ok(form) => form,
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
-
-    let email = match SubscriberEmail::parse(form.email.clone()) {
-        Ok(name) => name,
-        Err(_) => return HttpResponse::BadRequest().finish(),
-    };
-
-    let new_subscriber = NewSubscriber { email, name };
 
     match insert_subscriber(&pg_pool, &new_subscriber).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
-}
-
-pub fn is_valid_name(s: &str) -> bool {
-    let is_empty_or_whitespace = s.trim().is_empty();
-    let is_too_long = s.graphemes(true).count() > 256;
-    let forbiden_characters = ['/', '(', ')', '"', '<', '>', '\\', '{', '}'];
-    let contains_forbiden_characters = s.chars().any(|g| forbiden_characters.contains(&g));
-
-    !(is_empty_or_whitespace || is_too_long || contains_forbiden_characters)
 }
 
 #[tracing::instrument(
