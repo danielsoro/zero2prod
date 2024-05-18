@@ -79,7 +79,9 @@ async fn subscribe_returns_a_400_when_fields_are_present_but_invalid() {
             "name=/guin&email=ursula_le_gui%40gmail.com".to_string(),
             "forbidden character",
         ),
-        (format!("email=ursula_le_gui%40gmail.com"), "empty name"),
+        (format!("email=ursula_le_gui%40gmail.com"), "without name"),
+        (format!("name=%20&email=%20"), "both empty"),
+        (format!("name=Francisco&email=%20"), "email empty"),
     ];
 
     for (invalid_body, error_message) in test_cases {

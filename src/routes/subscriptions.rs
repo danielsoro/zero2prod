@@ -4,7 +4,7 @@ use sqlx::PgPool;
 use unicode_segmentation::UnicodeSegmentation;
 use uuid::Uuid;
 
-use crate::domain::{NewSubscriber, SubscriberName};
+use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -27,10 +27,12 @@ pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -
         Err(_) => return HttpResponse::BadRequest().finish(),
     };
 
-    let new_subscriber = NewSubscriber {
-        email: form.email.clone(),
-        name,
+    let email = match SubscriberEmail::parse(form.email.clone()) {
+        Ok(name) => name,
+        Err(_) => return HttpResponse::BadRequest().finish(),
     };
+
+    let new_subscriber = NewSubscriber { email, name };
 
     match insert_subscriber(&pg_pool, &new_subscriber).await {
         Ok(_) => HttpResponse::Ok().finish(),
@@ -61,7 +63,7 @@ pub async fn insert_subscriber(
         VALUES ($1, $2, $3, $4)
     "#,
         Uuid::new_v4(),
-        new_subscriber.email,
+        new_subscriber.email.as_ref(),
         new_subscriber.name.as_ref(),
         Utc::now()
     )
