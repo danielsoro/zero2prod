@@ -1,7 +1,10 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use chrono::Utc;
 use sqlx::PgPool;
+use unicode_segmentation::UnicodeSegmentation;
 use uuid::Uuid;
+
+use crate::domain::{NewSubscriber, SubscriberName};
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -19,28 +22,42 @@ pub struct FormData {
     )
 )]
 pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> impl Responder {
-    match insert_subscriber(&pg_pool, &form).await {
+    let new_subscriber = NewSubscriber {
+        email: form.email.clone(),
+        name: SubscriberName::parse(form.name.clone()).expect("Name validation failed"),
+    };
+
+    match insert_subscriber(&pg_pool, &new_subscriber).await {
         Ok(_) => HttpResponse::Ok().finish(),
-        Err(e) => {
-            tracing::error!("Failed to execute query when saving new subscriber {:?}", e);
-            HttpResponse::InternalServerError().finish()
-        }
+        Err(_) => HttpResponse::InternalServerError().finish(),
     }
+}
+
+pub fn is_valid_name(s: &str) -> bool {
+    let is_empty_or_whitespace = s.trim().is_empty();
+    let is_too_long = s.graphemes(true).count() > 256;
+    let forbiden_characters = ['/', '(', ')', '"', '<', '>', '\\', '{', '}'];
+    let contains_forbiden_characters = s.chars().any(|g| forbiden_characters.contains(&g));
+
+    !(is_empty_or_whitespace || is_too_long || contains_forbiden_characters)
 }
 
 #[tracing::instrument(
     name = "Saving new subscriber details in the database",
-    skip(pg_pool, form)
+    skip(pg_pool, new_subscriber)
 )]
-pub async fn insert_subscriber(pg_pool: &PgPool, form: &FormData) -> Result<(), sqlx::Error> {
+pub async fn insert_subscriber(
+    pg_pool: &PgPool,
+    new_subscriber: &NewSubscriber,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
         INSERT INTO subscriptions (id, email, name, subscribed_at)
         VALUES ($1, $2, $3, $4)
     "#,
         Uuid::new_v4(),
-        form.email,
-        form.name,
+        new_subscriber.email,
+        new_subscriber.name.as_ref(),
         Utc::now()
     )
     .execute(pg_pool)
