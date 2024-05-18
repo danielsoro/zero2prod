@@ -29,7 +29,7 @@ pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -
 
     let new_subscriber = NewSubscriber {
         email: form.email.clone(),
-        name: name,
+        name,
     };
 
     match insert_subscriber(&pg_pool, &new_subscriber).await {
