@@ -1,17 +1,14 @@
-use unicode_segmentation::UnicodeSegmentation;
+use validator::ValidateEmail;
 
 #[derive(Debug)]
 pub struct SubscriberEmail(String);
 
 impl SubscriberEmail {
     pub fn parse(s: String) -> Result<SubscriberEmail, String> {
-        let is_empty_or_whitespace = s.trim().is_empty();
-        let is_too_long = s.graphemes(true).count() > 256;
-
-        if is_empty_or_whitespace || is_too_long {
-            Err(format!("{} is not a valid subscriber email", s))
-        } else {
+        if ValidateEmail::validate_email(&s) {
             Ok(Self(s))
+        } else {
+            Err(format!("{} is not a valid subscriber email", s))
         }
     }
 }
@@ -29,12 +26,6 @@ mod test {
     use crate::domain::SubscriberEmail;
 
     #[test]
-    fn a_256_grapheme_long_email_is_valid() {
-        let email = format!("{}@gmail.com", "ё".repeat(100));
-        assert_ok!(SubscriberEmail::parse(email));
-    }
-
-    #[test]
     fn a_email_longer_than_256_grapheme_is_rejected() {
         let email = "a".repeat(257);
         assert_err!(SubscriberEmail::parse(email));
@@ -50,5 +41,23 @@ mod test {
     fn empty_string_is_rejected() {
         let name = "".to_string();
         assert_err!(SubscriberEmail::parse(name));
+    }
+
+    #[test]
+    fn email_missing_at_symbol_is_rejected() {
+        let email = "ursuladomain.com".to_string();
+        assert_err!(SubscriberEmail::parse(email));
+    }
+
+    #[test]
+    fn email_missing_subject_is_rejected() {
+        let email = "@domain.com".to_string();
+        assert_err!(SubscriberEmail::parse(email));
+    }
+
+    #[test]
+    fn a_valid_email_is_parsed_succesfull() {
+        let email = "daniel@domain.com".to_string();
+        assert_ok!(SubscriberEmail::parse(email));
     }
 }
