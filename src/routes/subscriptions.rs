@@ -24,6 +24,13 @@ impl TryInto<NewSubscriber> for Form<FormData> {
     }
 }
 
+impl TryFrom<FormData> for NewSubscriber {
+    type Error = String;
+    fn try_from(value: FormData) -> Result<NewSubscriber, Self::Error> {
+        value.try_into()
+    }
+}
+
 #[post("")]
 #[tracing::instrument(
     name = "Adding a new subscriber",
