@@ -56,7 +56,7 @@ pub async fn spawn_app() -> TestApp {
     let pg_pool = configure_database(&configuration.database).await;
 
     let server = run(listener, pg_pool.clone()).expect("Failed to bind address");
-    let _ = tokio::spawn(server);
+    tokio::spawn(server);
 
     TestApp {
         address: format!("http://localhost:{}", port),
