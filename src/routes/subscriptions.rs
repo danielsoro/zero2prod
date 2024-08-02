@@ -10,12 +10,12 @@ use uuid::Uuid;
 use crate::domain::{NewSubscriber, SubscriberEmail, SubscriberName};
 
 #[derive(serde::Deserialize)]
-pub struct FormData {
+pub struct SubscriberFormData {
     name: String,
     email: String,
 }
 
-impl TryInto<NewSubscriber> for Form<FormData> {
+impl TryInto<NewSubscriber> for Form<SubscriberFormData> {
     type Error = String;
     fn try_into(self) -> Result<NewSubscriber, Self::Error> {
         let name = SubscriberName::parse(self.0.name)?;
@@ -24,9 +24,9 @@ impl TryInto<NewSubscriber> for Form<FormData> {
     }
 }
 
-impl TryFrom<FormData> for NewSubscriber {
+impl TryFrom<SubscriberFormData> for NewSubscriber {
     type Error = String;
-    fn try_from(value: FormData) -> Result<NewSubscriber, Self::Error> {
+    fn try_from(value: SubscriberFormData) -> Result<NewSubscriber, Self::Error> {
         value.try_into()
     }
 }
@@ -40,7 +40,10 @@ impl TryFrom<FormData> for NewSubscriber {
         subscriber_name = %form.name
     )
 )]
-pub async fn subscribes(form: web::Form<FormData>, pg_pool: web::Data<PgPool>) -> HttpResponse {
+pub async fn subscribes(
+    form: web::Form<SubscriberFormData>,
+    pg_pool: web::Data<PgPool>,
+) -> HttpResponse {
     let new_subscriber = match form.try_into() {
         Ok(form) => form,
         Err(_) => return HttpResponse::BadRequest().finish(),
