@@ -63,5 +63,5 @@ pub async fn spawn_app() -> TestApp {
     let server = run(listener, test_app.pg_pool.clone()).expect("Failed to bind address");
     tokio::spawn(server);
 
-    return test_app;
+    test_app
 }
